@@ -1,63 +1,23 @@
 #include "Visualization.h"
 
-const wchar_t* CLASS_NAME = L"OpenGLProjectMWindow";
-const TChar KeyFullscreen[] = TEXT("ProjectM\\Fullscreen");
-const TChar KeyFormLeft[]   = TEXT("ProjectM\\WindowX");
-const TChar KeyFormTop[]    = TEXT("ProjectM\\WindowY");
-const TChar KeyFormHeight[] = TEXT("ProjectM\\WindowHeight");
-const TChar KeyFormWidth[]  = TEXT("ProjectM\\WindowWidth");
+static const wchar_t* CLASS_NAME = L"OpenGLProjectMWindow";
+static const TChar KeyFullscreen[] = TEXT("ProjectM\\Fullscreen");
+static const TChar KeyFormLeft[]   = TEXT("ProjectM\\WindowX");
+static const TChar KeyFormTop[]    = TEXT("ProjectM\\WindowY");
+static const TChar KeyFormHeight[] = TEXT("ProjectM\\WindowHeight");
+static const TChar KeyFormWidth[]  = TEXT("ProjectM\\WindowWidth");
+static const TChar VisualizationName[] = TEXT("ProjectM");
 
-IAIMPString* makeString(IAIMPCore* core, const TChar* text)
+Visualization::Visualization(IAIMPCore* core, HINSTANCE inst): VisualizationBase(core, inst)
 {
-	IAIMPString* string;
-	if (SUCCEEDED(core->CreateObject(IID_IAIMPString, reinterpret_cast<void**>(&string))))
-	{
-		string->SetData((PChar)text, _clen(text));
-		return string;
-	}
-	return nullptr;
-}
-
-Visualization::Visualization(IAIMPCore* core, HINSTANCE inst)
-{
-	this->core = core;
-	this->inst = inst;
-
 	std::string currentPath(MAX_PATH, '\0');
 	DWORD length = GetCurrentDirectoryA(MAX_PATH, currentPath.data());
 	currentPath.resize(length);
 	pathPresets  = currentPath + "\\Presets\\";
 	pathTextures = currentPath + "\\Textures\\";
-	error.clear();
 }
 
-BOOL Visualization::isOurRIID(REFIID riid)
-{
-	return EqualGUID(riid, IID_IAIMPExtensionEmbeddedVisualization);
-}
-
-DWORD __stdcall Visualization::GetFlags()
-{
-	return 
-		AIMP_VISUAL_FLAGS_NOT_SUSPEND |
-		AIMP_VISUAL_FLAGS_RQD_DATA_WAVEFORM;
-}
-
-HRESULT __stdcall Visualization::GetMaxDisplaySize(INT32* Width, INT32* Height)
-{
-	return E_NOTIMPL;
-}
-
-HRESULT __stdcall Visualization::GetName(IAIMPString** S)
-{
-	IAIMPString* result = makeString(core, VisualizationName);
-	if (result == nullptr)
-		return E_FAIL;
-	(*S) = result;
-	return S_OK;
-}
-
-HRESULT __stdcall Visualization::Initialize(INT32 Width, INT32 Height)
+HRESULT WINAPI Visualization::Initialize(INT32 Width, INT32 Height)
 {
 #pragma region "Create the Window"
 
@@ -78,6 +38,7 @@ HRESULT __stdcall Visualization::Initialize(INT32 Width, INT32 Height)
 		}
 	}
 
+	wndRectDirty = true;
 	wnd = CreateWindowEx(WS_EX_TOOLWINDOW, CLASS_NAME, nullptr, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, GetOwnerWnd(), nullptr, inst, nullptr);
 	if (wnd == 0)
@@ -86,7 +47,7 @@ HRESULT __stdcall Visualization::Initialize(INT32 Width, INT32 Height)
 		return E_FAIL;
 	}
 	SetProp(wnd, L"SELF", HANDLE(this));
-	ConfigLoad();
+	VisualizationBase::ConfigLoad();
 	UpdateWindow(wnd);
 
 	wndDC = GetDC(wnd);
@@ -153,58 +114,19 @@ HRESULT __stdcall Visualization::Initialize(INT32 Width, INT32 Height)
 		return E_FAIL;
 	}
 
-	pm = projectm_create();
-	if (pm == nullptr)
-	{
-		OnError("Failed to initialize ProjectM");
-		Finalize();
-		return E_HANDLE;
-	}
-
-	error.clear();
-	const char* path = pathTextures.data();
-	projectm_set_texture_search_paths(pm, &path, 1);
-
-	projectm_set_fps(pm, 30);
-	projectm_set_beat_sensitivity(pm, 1.0);
-	projectm_set_aspect_correction(pm, true);
-
-	presets = projectm_playlist_create(pm);
-	if (presets != nullptr)
-	{
-		projectm_playlist_insert_path(presets, pathPresets.data(), 0, true, true);
-		int presetCount = projectm_playlist_size(presets);
-		if (presetCount > 0)
-		{
-			projectm_playlist_set_position(presets, rand() % presetCount, true);
-			projectm_playlist_set_shuffle(presets, true);
-			projectm_set_preset_duration(pm, 33);
-		}
-	}
-
-	UpdateWindowCaption();
 #pragma endregion
 
-	glHeight = 0;
-	glWidth = 0;
-	return S_OK;
+	if (Succeeded(VisualizationBase::Initialize(Width, Height)))
+	{
+		UpdateWindowCaption();
+		return S_OK;
+	}
+	return E_FAIL;
 }
 
-void __stdcall Visualization::Finalize()
+void WINAPI Visualization::Finalize()
 {
-	ConfigSave();
-
-	if (presets)
-	{
-		projectm_playlist_destroy(presets);
-		presets = nullptr;
-	}
-
-	if (pm) 
-	{
-		projectm_destroy(pm);
-		pm = nullptr;
-	}
+	VisualizationBase::Finalize();
 
 	if (gl) 
 	{
@@ -224,35 +146,29 @@ void __stdcall Visualization::Finalize()
 		DestroyWindow(wnd);
 		wnd = 0;
 	}
-
-	error.clear();
-	glHeight = 0;
-	glWidth = 0;
 }
 
-void __stdcall Visualization::Click(INT32 X, INT32 Y, INT32 Button)
+void WINAPI Visualization::Click(INT32 X, INT32 Y, INT32 Button)
 {
 	BringWindowToTop(wnd);
 }
 
-void __stdcall Visualization::Draw(HCANVAS Canvas, PAIMPVisualData Data)
+void WINAPI Visualization::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 {
 	// TODO: draw stub
 	if (wndDC == 0)
 		return;
 	if (wglMakeCurrent(wndDC, gl))
 	{
-		GetClientRect(wnd, &wndRect);
-		if (wndRect.right - wndRect.left != glWidth ||
-			wndRect.bottom - wndRect.top != glHeight)
+		if (wndRectDirty || width == 0 || height == 0)
 		{
-			glHeight = wndRect.bottom - wndRect.top;
-			glWidth = wndRect.right - wndRect.left;
-			if (pm != nullptr)
-				projectm_set_window_size(pm, glWidth, glHeight);
+			GetClientRect(wnd, &wndRect);
+			VisualizationBase::Resize(
+				wndRect.right - wndRect.left,
+				wndRect.bottom - wndRect.top);
 		}
 
-		glViewport(0, 0, glWidth, glHeight);
+		glViewport(0, 0, width, height);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -266,17 +182,10 @@ void __stdcall Visualization::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 			}
 		}
 
+		PushAudioData(Data);
+
 		if (pm != nullptr)
-		{
-			int j = 0;
-			for (int i = 0; i < AIMP_VISUAL_WAVEFORM_MAX; i++)
-			{
-				waveform[j++] = Data->WaveForm[0][i];
-				waveform[j++] = Data->WaveForm[1][i];
-			}
-			projectm_pcm_add_float(pm, &waveform[0], AIMP_VISUAL_WAVEFORM_MAX, PROJECTM_STEREO);
 			projectm_opengl_render_frame(pm);
-		}
 
 		SwapBuffers(wndDC);
 	}
@@ -288,46 +197,37 @@ void __stdcall Visualization::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 		}
 }
 
-void Visualization::ConfigLoad()
+void Visualization::ConfigLoad(IAIMPConfig* config)
 {
 	int showCmd = SW_SHOW;
-	IAIMPServiceConfig* config;
-	if (Succeeded(core->QueryInterface(IID_IAIMPConfig, reinterpret_cast<void**>(&config))))
-	{
-		int x, y, w, h = 0; 
-		config->GetValueAsInt32(makeString(core, KeyFormLeft),   &x);
-		config->GetValueAsInt32(makeString(core, KeyFormTop),    &y);
-		config->GetValueAsInt32(makeString(core, KeyFormWidth),  &w);
-		config->GetValueAsInt32(makeString(core, KeyFormHeight), &h);
-		if (w > 0 && h > 0)
-			SetWindowPos(wnd, 0, x, y, w, h, SWP_NOZORDER);
+	int x, y, w, h = 0; 
+	config->GetValueAsInt32(MakeString(KeyFormLeft),   &x);
+	config->GetValueAsInt32(MakeString(KeyFormTop),    &y);
+	config->GetValueAsInt32(MakeString(KeyFormWidth),  &w);
+	config->GetValueAsInt32(MakeString(KeyFormHeight), &h);
+	if (w > 0 && h > 0)
+		SetWindowPos(wnd, 0, x, y, w, h, SWP_NOZORDER);
 
-		int v = 0;
-		config->GetValueAsInt32(makeString(core, KeyFullscreen), &v);
-		if (v != 0)
-			showCmd = SW_MAXIMIZE;
-	}
+	int v = 0;
+	config->GetValueAsInt32(MakeString(KeyFullscreen), &v);
+	if (v != 0)
+		showCmd = SW_MAXIMIZE;
 	ShowWindow(wnd, showCmd);
 }
 
-void Visualization::ConfigSave()
+void Visualization::ConfigSave(IAIMPConfig* config)
 {
 	if (wnd == 0) return;
-
-	IAIMPServiceConfig* config;
-	if (Succeeded(core->QueryInterface(IID_IAIMPConfig, reinterpret_cast<void**>(&config))))
+	WINDOWPLACEMENT pos = {};
+	pos.length = sizeof(pos);
+	if (GetWindowPlacement(wnd, &pos))
 	{
-		WINDOWPLACEMENT pos = {};
-		pos.length = sizeof(pos);
-		if (GetWindowPlacement(wnd, &pos))
-		{
-			config->SetValueAsInt32(makeString(core, KeyFormLeft),   pos.rcNormalPosition.left);
-			config->SetValueAsInt32(makeString(core, KeyFormTop),	 pos.rcNormalPosition.top);
-			config->SetValueAsInt32(makeString(core, KeyFormWidth),  pos.rcNormalPosition.right - pos.rcNormalPosition.left);
-			config->SetValueAsInt32(makeString(core, KeyFormHeight), pos.rcNormalPosition.bottom - pos.rcNormalPosition.top);
-		}
-		config->SetValueAsInt32(makeString(core, KeyFullscreen), IsZoomed(wnd));
+		config->SetValueAsInt32(MakeString(KeyFormLeft),   pos.rcNormalPosition.left);
+		config->SetValueAsInt32(MakeString(KeyFormTop),    pos.rcNormalPosition.top);
+		config->SetValueAsInt32(MakeString(KeyFormWidth),  pos.rcNormalPosition.right - pos.rcNormalPosition.left);
+		config->SetValueAsInt32(MakeString(KeyFormHeight), pos.rcNormalPosition.bottom - pos.rcNormalPosition.top);
 	}
+	config->SetValueAsInt32(MakeString(KeyFullscreen), IsZoomed(wnd));
 }
 
 HWND Visualization::GetOwnerWnd()
@@ -339,21 +239,15 @@ HWND Visualization::GetOwnerWnd()
 	return ownerWnd;
 }
 
-void Visualization::OnClick(BOOL right)
+HRESULT WINAPI Visualization::GetName(IAIMPString** S)
 {
-	if (right)
-	{
-		//LONG style = GetWindowLong(wnd, GWL_STYLE);
-		//if (style & WS_OVERLAPPEDWINDOW)
-		//	style = WS_POPUP;
-		//else
-		//	style = WS_OVERLAPPEDWINDOW;
+	(*S) = MakeString(VisualizationName);
+	return S_OK;
+}
 
-		//SetWindowLong(wnd, GWL_STYLE, style);
-	}
-	else
-		if (presets != nullptr)
-			projectm_playlist_play_next(presets, true);
+void WINAPI Visualization::Resize(INT32 NewWidth, INT32 NewHeight)
+{
+	// do nothing here
 }
 
 void Visualization::OnClosed()
@@ -365,16 +259,8 @@ void Visualization::OnClosed()
 
 void Visualization::OnError(const char* text)
 {
-	error = text;
-#ifdef VIS_DEBUG_LOG
-	OutputDebugStringA(text);
-#endif 
+	VisualizationBase::OnError(text);
 	UpdateWindowCaption();
-}
-
-void __stdcall Visualization::Resize(INT32 NewWidth, INT32 NewHeight)
-{
-	// do nothing
 }
 
 void Visualization::UpdateWindowCaption()
@@ -405,6 +291,12 @@ LRESULT CALLBACK Visualization::WndProc(HWND wnd, UINT msg, WPARAM w, LPARAM l)
 	Visualization* self;
 	switch (msg) 
 	{
+		case WM_SIZE:
+			self = (Visualization*)GetProp(wnd, L"SELF");
+			if (self != nullptr)
+				self->wndRectDirty = true;
+			break;
+
 		case WM_GETMINMAXINFO:
 			if (l != 0)
 			{
@@ -415,10 +307,9 @@ LRESULT CALLBACK Visualization::WndProc(HWND wnd, UINT msg, WPARAM w, LPARAM l)
 			break;
 
 		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
 			self = (Visualization*)GetProp(wnd, L"SELF");
 			if (self != nullptr)
-				self->OnClick(msg == WM_RBUTTONUP);
+				self->Click(0, 0, AIMP_VISUAL_CLICK_BUTTON_LEFT);
 			break;
 
 		case WM_CLOSE:

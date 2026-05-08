@@ -8,6 +8,7 @@
 static HINSTANCE mInstance;
 static const TChar Author[] = TEXT("Artem Izmaylov");
 static const TChar Description[] = TEXT("The most advanced open-source music visualizer");
+static const TChar Name[] = TEXT("ProjectM Visualization v1.0b");
 
 class Plugin : public IUnknownImpl<IAIMPPlugin>
 {
@@ -16,7 +17,7 @@ class Plugin : public IUnknownImpl<IAIMPPlugin>
         switch (Index)
         {
         case AIMP_PLUGIN_INFO_NAME:
-            return const_cast<PChar>(VisualizationName);
+            return const_cast<PChar>(Name);
         case AIMP_PLUGIN_INFO_AUTHOR:
             return const_cast<PChar>(Author);
         case AIMP_PLUGIN_INFO_SHORT_DESCRIPTION:
