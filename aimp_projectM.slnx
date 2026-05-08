@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Release" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="aimp_projectM.vcxproj" Id="c7126c4b-085e-4c50-93a1-89bdd090b424" />
+</Solution>

@@ -1,0 +1,6 @@
+﻿aimp_sdk
+build
+libprojectM
+.vs
+*.dll
+*.so
