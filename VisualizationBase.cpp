@@ -4,6 +4,10 @@ VisualizationBase::VisualizationBase(IAIMPCore* core, HINSTANCE inst)
 {
 	this->core = core;
 	this->inst = inst;
+
+	std::string currentPath = std::filesystem::current_path().string();
+	this->pathPresets  = (std::filesystem::path(currentPath) / "Presets").string();
+	this->pathTextures = (std::filesystem::path(currentPath) / "Textures").string();
 	error.clear();
 }
 
@@ -117,32 +121,53 @@ void WINAPI VisualizationBase::Click(INT32 X, INT32 Y, INT32 Button)
 		projectm_playlist_play_next(presets, true);
 }
 
+void WINAPI VisualizationBase::Draw(HCANVAS Canvas, PAIMPVisualData Data)
+{
+	if (pm == nullptr)
+		return;
+	if (pendingHeight != height || pendingWidth != width) 
+	{
+		width = pendingWidth;
+		height = pendingHeight;
+		ResizeSurface(width, height);
+	}
+
+	int j = 0;
+	for (int i = 0; i < AIMP_VISUAL_WAVEFORM_MAX; i++)
+	{
+		waveform[j++] = Data->WaveForm[0][i];
+		waveform[j++] = Data->WaveForm[1][i];
+	}
+	projectm_pcm_add_float(pm, &waveform[0], AIMP_VISUAL_WAVEFORM_MAX, PROJECTM_STEREO);
+
+	if (presets != nullptr)
+	{
+		int index = projectm_playlist_get_position(presets);
+		if (index != activePreset)
+		{
+			activePreset = index;
+			UpdateDisplayingText();
+		}
+	}
+}
+
 void VisualizationBase::OnError(const char* text)
 {
 	error = text;
+	UpdateDisplayingText();
 }
 
 void WINAPI VisualizationBase::Resize(INT32 NewWidth, INT32 NewHeight)
 {
-	if (NewWidth != width || NewHeight != height) 
-	{
-		height = NewHeight;
-		width = NewWidth;
-		if (pm != nullptr)
-			projectm_set_window_size(pm, width, height);
-	}
+	// do nothing
 }
 
-void VisualizationBase::PushAudioData(PAIMPVisualData Data)
+void VisualizationBase::ResizeSurface(int w, int h)
 {
-	if (pm != nullptr)
-	{
-		int j = 0;
-		for (int i = 0; i < AIMP_VISUAL_WAVEFORM_MAX; i++)
-		{
-			waveform[j++] = Data->WaveForm[0][i];
-			waveform[j++] = Data->WaveForm[1][i];
-		}
-		projectm_pcm_add_float(pm, &waveform[0], AIMP_VISUAL_WAVEFORM_MAX, PROJECTM_STEREO);
-	}
+	projectm_set_window_size(pm, width, height);
+}
+
+void VisualizationBase::UpdateDisplayingText()
+{
+	// do nothing
 }

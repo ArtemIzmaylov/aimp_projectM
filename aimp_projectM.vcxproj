@@ -106,12 +106,14 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Visualization.h" />
     <ClInclude Include="VisualizationBase.h" />
+    <ClInclude Include="VisualizationWindowBased.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aimp_sdk\apiTypes.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Visualization.cpp" />
     <ClCompile Include="VisualizationBase.cpp" />
+    <ClCompile Include="VisualizationWindowBased.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

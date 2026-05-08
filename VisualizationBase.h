@@ -11,6 +11,7 @@
 #include <GL/glew.h>
 #include <string>
 #include <iostream>
+#include <filesystem>
 
 class VisualizationBase : public IUnknownImpl<IAIMPExtensionEmbeddedVisualization>
 {
@@ -19,7 +20,10 @@ protected:
 	IAIMPCore* core;
 
 	int activePreset = -1;
-	int width, height = 0;
+	int pendingHeight = 0;
+	int pendingWidth = 0;
+	int height = 0;
+	int width = 0;
 	projectm_handle pm = nullptr;
 	projectm_playlist_handle presets = nullptr;
 
@@ -33,8 +37,9 @@ protected:
 	virtual void ConfigLoad(IAIMPConfig* config);
 	virtual void ConfigSave(IAIMPConfig* config);
 	IAIMPString* MakeString(const TChar* text);
-	void PushAudioData(PAIMPVisualData Data);
-	virtual void OnError(const char* text);
+	void OnError(const char* text);
+	void ResizeSurface(int w, int h);
+	virtual void UpdateDisplayingText();
 protected:
 	// IUnknown
 	virtual BOOL isOurRIID(REFIID riid);
@@ -46,7 +51,7 @@ protected:
 	virtual HRESULT WINAPI GetMaxDisplaySize(INT32* Width, INT32* Height);
 	virtual HRESULT WINAPI GetName(IAIMPString** S) = 0;
 	virtual void WINAPI Click(INT32 X, INT32 Y, INT32 Button);
-	virtual void WINAPI Draw(HCANVAS Canvas, PAIMPVisualData Data) = 0;
+	virtual void WINAPI Draw(HCANVAS Canvas, PAIMPVisualData Data);
 	virtual void WINAPI Resize(INT32 NewWidth, INT32 NewHeight);
 public:
 	VisualizationBase(IAIMPCore* core, HINSTANCE inst);
