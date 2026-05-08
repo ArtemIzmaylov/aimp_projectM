@@ -1,5 +1,5 @@
 # About ProjectM
--------------------------------------------------------------------------
+
 projectM is the most advanced open-source music visualizer.
 Experience psychedelic and mesmerizing visuals by transforming music into 
 equations that render into a limitless array of user-contributed visualizations.
@@ -11,7 +11,7 @@ https://github.com/projectM-visualizer/projectm
 
 
 # aimp_projectM
--------------------------------------------------------------------------
+
 aimp_projectM is ProjectM-based visualization plugin for the [AIMP](https://www.aimp.ru) app.
 
 **Important**: plugin is currently undergoing heavy development.

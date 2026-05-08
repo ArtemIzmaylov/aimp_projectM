@@ -4,3 +4,4 @@ libprojectM
 .vs
 *.dll
 *.so
+*.aimppack
