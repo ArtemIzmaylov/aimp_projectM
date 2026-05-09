@@ -3,8 +3,11 @@
 
 static const TChar VisualizationName[] = TEXT("ProjectM");
 
-VisualizationEmbedded::VisualizationEmbedded(IAIMPCore* core): VisualizationBase(core)
-{}
+VisualizationEmbedded::~VisualizationEmbedded()
+{
+	if (directOutput)
+		delete directOutput;
+}
 
 void WINAPI VisualizationEmbedded::Finalize()
 {
@@ -53,11 +56,13 @@ HRESULT WINAPI VisualizationEmbedded::Initialize(INT32 Width, INT32 Height)
 void WINAPI VisualizationEmbedded::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 {
 	DrawCore(Data);
+	if (buffer == nullptr)
+		buffer = new unsigned char[width * height * 4];
 	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	SetDIBitsToDevice(Canvas, 0, 0, width, height, 0, 0, 0, height, buffer, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
 }
 
-void WINAPI VisualizationEmbedded::DrawCore(PAIMPVisualData Data)
+void VisualizationEmbedded::DrawCore(PAIMPVisualData Data)
 {
 	// Ensure the objects are ready
 	if (window == nullptr || pm == nullptr)
@@ -81,8 +86,6 @@ void WINAPI VisualizationEmbedded::DrawCore(PAIMPVisualData Data)
 
 BOOL VisualizationEmbedded::CreateFrameObject(int w, int h)
 {
-	buffer = new unsigned char[w * h * 4];
-
 	glGenFramebuffers(1, &fbo);
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -142,25 +145,22 @@ void VisualizationEmbedded::ResizeSurface(int w, int h)
 	VisualizationBase::ResizeSurface(w, h);
 }
 
-//void VisualizationEmbedded::UpdateDisplayingText()
-//{
-//	if (!error.empty())
-//	{
-//		SetWindowTextA(wnd, error.data());
-//		return;
-//	}
-//	
-//	std::string text("AIMP - ProjectM VisualizationEmbedded");
-//	if (presets != nullptr && activePreset >= 0) 
-//	{
-//		char* current = projectm_playlist_item(presets, activePreset);
-//		if (current != nullptr)
-//		{
-//			std::string path(current);
-//			size_t pos = path.find_last_of("\\/");
-//			if (pos != std::string::npos)
-//				text += " - [" + path.substr(pos + 1) + "]";
-//		}
-//	}
-//	SetWindowTextA(wnd, text.data());
-//}
+HRESULT _unknwncall VisualizationEmbedded::QueryInterface(REFIID riid, LPVOID* ppvObj)
+{
+	HRESULT result = VisualizationBase::QueryInterface(riid, ppvObj);
+	if (result == E_NOINTERFACE && EqualGUID(riid, IID_IAIMPVisualizationDirectOutput))
+	{
+		if (directOutput == nullptr)
+			directOutput = new VisualizationEmbeddedDirectOutput(this);
+		*ppvObj = directOutput;
+		AddRef();
+		return S_OK;
+	}
+	return result;
+}
+
+void WINAPI VisualizationEmbeddedDirectOutput::Draw(RGBQUAD* Buffer, PAIMPVisualData Data)
+{
+	owner->DrawCore(Data);
+	glReadPixels(0, 0, owner->width, owner->height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+}

@@ -42,6 +42,8 @@ protected:
 	virtual void ResizeSurface(int w, int h);
 	virtual void UpdateDisplayingText();
 protected:
+	virtual void DrawCore(PAIMPVisualData Data);
+
 	// IUnknown
 	virtual BOOL isOurRIID(REFIID riid);
 
@@ -53,7 +55,6 @@ protected:
 	virtual HRESULT WINAPI GetName(IAIMPString** S) = 0;
 	virtual void WINAPI Click(INT32 X, INT32 Y, INT32 Button);
 	virtual void WINAPI Draw(HCANVAS Canvas, PAIMPVisualData Data) = 0;
-	virtual void WINAPI DrawCore(PAIMPVisualData Data);
 	virtual void WINAPI Resize(INT32 NewWidth, INT32 NewHeight);
 public:
 	VisualizationBase(IAIMPCore* core);

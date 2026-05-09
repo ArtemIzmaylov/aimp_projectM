@@ -119,7 +119,7 @@ void WINAPI VisualizationBase::Click(INT32 X, INT32 Y, INT32 Button)
 		projectm_playlist_play_next(presets, true);
 }
 
-void WINAPI VisualizationBase::DrawCore(PAIMPVisualData Data)
+void VisualizationBase::DrawCore(PAIMPVisualData Data)
 {
 	if (pm == nullptr)
 		return;
