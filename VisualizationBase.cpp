@@ -1,10 +1,8 @@
 #include "VisualizationBase.h"
 
-VisualizationBase::VisualizationBase(IAIMPCore* core, HINSTANCE inst)
+VisualizationBase::VisualizationBase(IAIMPCore* core)
 {
 	this->core = core;
-	this->inst = inst;
-
 	std::string currentPath = std::filesystem::current_path().string();
 	this->pathPresets  = (std::filesystem::path(currentPath) / "Presets").string();
 	this->pathTextures = (std::filesystem::path(currentPath) / "Textures").string();
@@ -121,11 +119,11 @@ void WINAPI VisualizationBase::Click(INT32 X, INT32 Y, INT32 Button)
 		projectm_playlist_play_next(presets, true);
 }
 
-void WINAPI VisualizationBase::Draw(HCANVAS Canvas, PAIMPVisualData Data)
+void WINAPI VisualizationBase::DrawCore(PAIMPVisualData Data)
 {
 	if (pm == nullptr)
 		return;
-	if (pendingHeight != height || pendingWidth != width) 
+	if (pendingHeight != height || pendingWidth != width)
 	{
 		width = pendingWidth;
 		height = pendingHeight;
@@ -154,12 +152,16 @@ void WINAPI VisualizationBase::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 void VisualizationBase::OnError(const char* text)
 {
 	error = text;
+#ifdef PROJECTM_VERBOSE_OUTPUT
+	OutputDebugStringA(text);
+#endif // PROJECTM_VERBOSE_OUTPUT
 	UpdateDisplayingText();
 }
 
 void WINAPI VisualizationBase::Resize(INT32 NewWidth, INT32 NewHeight)
 {
-	// do nothing
+	pendingWidth = NewWidth;
+	pendingHeight = NewHeight;
 }
 
 void VisualizationBase::ResizeSurface(int w, int h)

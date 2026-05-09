@@ -5,3 +5,4 @@ libprojectM
 *.dll
 *.so
 *.aimppack
+libglfw

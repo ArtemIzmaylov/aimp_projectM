@@ -30,10 +30,10 @@ Please, refer to our forum section for nigtly-builds, suggestions and dicussions
 
 You'll need a few things before you can compile the source code:
 * [AIMP C++ SDK](https://www.aimp.ru/?do=download&os=windows&cat=sdk), extract content of "Source/Cpp" folder to "./aimp_sdk/"
-* [ProjectM-4](https://github.com/projectM-visualizer/projectm) source code must be extracted to ./libprojectM/
+* [ProjectM-4's](https://github.com/projectM-visualizer/projectm) source code must be extracted to ./libprojectM/
+* [GLFW's](https://github.com/glfw/glfw) source code must be extracted to ./libglfw/
 * Microsoft VisualStudio 2026
 
 
 **To-do**
 * Linux support
-* Rendering to AIMP's embedded visualization window

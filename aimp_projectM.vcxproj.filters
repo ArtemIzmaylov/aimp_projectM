@@ -18,13 +18,10 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Visualization.h">
+    <ClInclude Include="VisualizationEmbedded.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VisualizationBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VisualizationWindowBased.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,16 +29,13 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Visualization.cpp">
+    <ClCompile Include="VisualizationEmbedded.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="aimp_sdk\apiTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VisualizationBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VisualizationWindowBased.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -47,12 +47,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)\build\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)\build\$(Platform)\</IntDir>
-    <LibraryPath>.\libprojectM\out\build\x86-Release\src\playlist;.\libprojectM\out\build\x86-Release\src\libprojectM;.\libprojectM\vcpkg_installed\x86-windows-static\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>.\libprojectM\out\build\x86-Release\src\playlist;.\libprojectM\out\build\x86-Release\src\libprojectM;.\libprojectM\vcpkg_installed\x86-windows-static\lib;.\libglfw\out\build\x86-Release\src;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)\build\$(Platform)\</IntDir>
     <OutDir>$(SolutionDir)\build\$(Platform)\</OutDir>
-    <LibraryPath>.\libprojectM\out\build\x64-Release\src\playlist;.\libprojectM\out\build\x64-Release\src\libprojectM;.\libprojectM\vcpkg_installed\x64-windows-static\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>.\libprojectM\out\build\x64-Release\src\playlist;.\libprojectM\out\build\x64-Release\src\libprojectM;W:\Repositories\Git\aimp_projectM\libglfw\out\build\x64-Release\src;.\libprojectM\vcpkg_installed\x64-windows-static\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -66,7 +66,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.\aimp_sdk;.\libprojectM\src\api\include;.\libprojectM\src\playlist\api;.\libprojectM\out\build\x86-Release\src\api\include;.\libprojectM\out\build\x86-Release\src\playlist\include;.\libprojectM\vcpkg_installed\x86-windows-static\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\aimp_sdk;.\libglfw\include;.\libprojectM\src\api\include;.\libprojectM\src\playlist\api;.\libprojectM\out\build\x86-Release\src\api\include;.\libprojectM\out\build\x86-Release\src\playlist\include;.\libprojectM\vcpkg_installed\x86-windows-static\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -74,7 +74,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>aimp_projectM.def</ModuleDefinitionFile>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;libprojectM-4.lib;libprojectM-4-playlist.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;libprojectM-4.lib;libprojectM-4-playlist.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>./aimp_projectM/aimp_projectM.dll</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -90,7 +90,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>.\aimp_sdk;.\libprojectM\src\api\include;.\libprojectM\src\playlist\api;.\libprojectM\out\build\x64-Release\src\api\include;.\libprojectM\out\build\x64-Release\src\playlist\include;.\libprojectM\vcpkg_installed\x64-windows-static\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\aimp_sdk;.\libglfw\include;.\libprojectM\src\api\include;.\libprojectM\src\playlist\api;.\libprojectM\out\build\x64-Release\src\api\include;.\libprojectM\out\build\x64-Release\src\playlist\include;.\libprojectM\vcpkg_installed\x64-windows-static\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -98,22 +98,20 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>aimp_projectM.def</ModuleDefinitionFile>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;libprojectM-4.lib;libprojectM-4-playlist.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;libprojectM-4.lib;libprojectM-4-playlist.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>./aimp_projectM/x64/aimp_projectM.dll</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Visualization.h" />
+    <ClInclude Include="VisualizationEmbedded.h" />
     <ClInclude Include="VisualizationBase.h" />
-    <ClInclude Include="VisualizationWindowBased.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="aimp_sdk\apiTypes.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="Visualization.cpp" />
+    <ClCompile Include="VisualizationEmbedded.cpp" />
     <ClCompile Include="VisualizationBase.cpp" />
-    <ClCompile Include="VisualizationWindowBased.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

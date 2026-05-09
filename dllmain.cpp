@@ -3,9 +3,10 @@
 #include "aimp_sdk/apiPlugin.h"
 #include "aimp_sdk/apiTypes.h"
 #include "aimp_sdk/IUnknownImpl.h"
-#include "Visualization.h"
+#include "VisualizationEmbedded.h"
 
-static HINSTANCE mInstance;
+// TODO: glfwSetErrorCallback(errorCallback);
+
 static const TChar Author[] = TEXT("Artem Izmaylov");
 static const TChar Description[] = TEXT("The most advanced open-source music visualizer");
 static const TChar Name[] = TEXT("ProjectM Visualization v1.0b");
@@ -33,12 +34,17 @@ class Plugin : public IUnknownImpl<IAIMPPlugin>
 
     HRESULT WINAPI Initialize(IAIMPCore* Core)
     {
-        Core->RegisterExtension(IID_IAIMPServiceVisualizations, new Visualization(Core, mInstance));
-        return S_OK;
+        if (glfwInit())
+        {
+            Core->RegisterExtension(IID_IAIMPServiceVisualizations, new VisualizationEmbedded(Core));
+            return S_OK;
+        }
+        return E_FAIL;
     }
 
     HRESULT WINAPI Finalize()
     {
+        glfwTerminate();
         return S_OK;
     }
 
@@ -58,7 +64,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                        LPVOID lpReserved
                      )
 {
-    mInstance = hModule;
     switch (ul_reason_for_call)
     {
         case DLL_PROCESS_ATTACH:

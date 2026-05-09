@@ -1,6 +1,7 @@
 #pragma once
 
 #define PROJECTM_STATIC_DEFINE 1
+#define PROJECTM_VERBOSE_OUTPUT 1
 
 #include "aimp_sdk/apiMessages.h"
 #include "aimp_sdk/apiTypes.h"
@@ -9,6 +10,7 @@
 #include <projectM-4/projectM.h>
 #include <projectM-4/playlist.h>
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <string>
 #include <iostream>
 #include <filesystem>
@@ -16,7 +18,6 @@
 class VisualizationBase : public IUnknownImpl<IAIMPExtensionEmbeddedVisualization>
 {
 protected:
-	HMODULE inst;
 	IAIMPCore* core;
 
 	int activePreset = -1;
@@ -38,7 +39,7 @@ protected:
 	virtual void ConfigSave(IAIMPConfig* config);
 	IAIMPString* MakeString(const TChar* text);
 	void OnError(const char* text);
-	void ResizeSurface(int w, int h);
+	virtual void ResizeSurface(int w, int h);
 	virtual void UpdateDisplayingText();
 protected:
 	// IUnknown
@@ -51,8 +52,9 @@ protected:
 	virtual HRESULT WINAPI GetMaxDisplaySize(INT32* Width, INT32* Height);
 	virtual HRESULT WINAPI GetName(IAIMPString** S) = 0;
 	virtual void WINAPI Click(INT32 X, INT32 Y, INT32 Button);
-	virtual void WINAPI Draw(HCANVAS Canvas, PAIMPVisualData Data);
+	virtual void WINAPI Draw(HCANVAS Canvas, PAIMPVisualData Data) = 0;
+	virtual void WINAPI DrawCore(PAIMPVisualData Data);
 	virtual void WINAPI Resize(INT32 NewWidth, INT32 NewHeight);
 public:
-	VisualizationBase(IAIMPCore* core, HINSTANCE inst);
+	VisualizationBase(IAIMPCore* core);
 };
