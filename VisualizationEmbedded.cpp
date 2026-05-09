@@ -28,7 +28,7 @@ HRESULT WINAPI VisualizationEmbedded::Initialize(INT32 Width, INT32 Height)
 	window = glfwCreateWindow(Width, Height, "ProjectM-Headless-OpenGL", nullptr, nullptr);
 	if (window == nullptr) 
 	{
-		OnError("GLFW failed to create a window");
+		LogEntry("GLFW failed to create a window");
 		Finalize();
 		return E_FAIL;
 	}
@@ -37,7 +37,7 @@ HRESULT WINAPI VisualizationEmbedded::Initialize(INT32 Width, INT32 Height)
 
 	if (glewInit() != 0)
 	{
-		OnError("GLEW failed to initialize");
+		LogEntry("GLEW failed to initialize");
 		Finalize();
 		return E_FAIL;
 	}
@@ -129,7 +129,7 @@ void VisualizationEmbedded::ResizeSurface(int w, int h)
 	FreeFrameObject();
 	if (!CreateFrameObject(w, h))
 	{
-		OnError("Failed to create FBO");
+		LogEntry("Failed to create FBO");
 		FreeFrameObject();
 	}
 

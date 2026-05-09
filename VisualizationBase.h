@@ -1,7 +1,7 @@
 #pragma once
 
 #define PROJECTM_STATIC_DEFINE 1
-#define PROJECTM_VERBOSE_OUTPUT 1
+#define PROJECTM_DEBUG_OUTPUT 1
 
 #include "aimp_sdk/apiMessages.h"
 #include "aimp_sdk/apiTypes.h"
@@ -19,6 +19,7 @@ class VisualizationBase : public IUnknownImpl<IAIMPExtensionEmbeddedVisualizatio
 {
 protected:
 	IAIMPCore* core;
+	IAIMPServiceLog* logger = nullptr;
 
 	int activePreset = -1;
 	int pendingHeight = 0;
@@ -28,14 +29,13 @@ protected:
 	projectm_handle pm = nullptr;
 	projectm_playlist_handle presets = nullptr;
 
-	std::string error;
 	std::string pathPresets;
 	std::string pathTextures;
 
 	SINGLE  waveform[2 * AIMP_VISUAL_WAVEFORM_MAX] = {};
 
+	void LogEntry(const char* text);
 	IAIMPString* MakeString(const TChar* text);
-	void OnError(const char* text);
 	virtual void ResizeSurface(int w, int h);
 protected:
 	virtual void DrawCore(PAIMPVisualData Data);

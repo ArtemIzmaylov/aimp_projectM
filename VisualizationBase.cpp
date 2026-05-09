@@ -6,8 +6,10 @@ VisualizationBase::VisualizationBase(IAIMPCore* core)
 	std::string currentPath = std::filesystem::current_path().string();
 	this->pathPresets  = (std::filesystem::path(currentPath) / "Presets").string();
 	this->pathTextures = (std::filesystem::path(currentPath) / "Textures").string();
-	error.clear();
 
+	// The Log Service was introduced in v6.0 Beta 4
+	if (Failed(core->QueryInterface(IID_IAIMPServiceLog, reinterpret_cast<void**>(&logger))))
+		logger = nullptr;
 }
 
 IAIMPString* VisualizationBase::MakeString(const TChar* text)
@@ -40,7 +42,6 @@ void WINAPI VisualizationBase::Finalize()
 		pm = nullptr;
 	}
 
-	error.clear();
 	width = height = 0;
 }
 
@@ -49,12 +50,11 @@ HRESULT WINAPI VisualizationBase::Initialize(INT32 Width, INT32 Height)
 	pm = projectm_create();
 	if (pm == nullptr)
 	{
-		OnError("Failed to initialize ProjectM");
+		LogEntry("Failed to initialize ProjectM");
 		Finalize();
 		return E_HANDLE;
 	}
 
-	error.clear();
 	width = height = 0;
 
 	const char* path = pathTextures.data();
@@ -124,17 +124,30 @@ void VisualizationBase::DrawCore(PAIMPVisualData Data)
 		if (index != activePreset)
 		{
 			activePreset = index;
+			char* active = projectm_playlist_item(presets, activePreset);
+			if (active != nullptr)
+			{
+				std::string path(active);
+				size_t pos = path.find_last_of("\\/");
+				if (pos != std::string::npos)
+				{
+					path = "preset: " + path.substr(pos + 1);
+					LogEntry(path.data());
+				}
+			}
+			else
+				LogEntry("preset: idle");
 		}
 	}
 }
 
-void VisualizationBase::OnError(const char* text)
+void VisualizationBase::LogEntry(const char* text)
 {
-	error = text;
-#ifdef PROJECTM_VERBOSE_OUTPUT
+#ifdef PROJECTM_DEBUG_OUTPUT
 	OutputDebugStringA(text);
-#endif // PROJECTM_VERBOSE_OUTPUT
-	UpdateDisplayingText();
+#endif 
+	if (logger != nullptr)
+		logger->Add1((char*)text, 0);
 }
 
 void WINAPI VisualizationBase::Resize(INT32 NewWidth, INT32 NewHeight)
