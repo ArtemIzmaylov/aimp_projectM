@@ -1,5 +1,4 @@
 #include "VisualizationEmbedded.h"
-//#include "stb_image_write.h"
 
 static const TChar VisualizationName[] = TEXT("ProjectM");
 
@@ -49,7 +48,6 @@ HRESULT WINAPI VisualizationEmbedded::Initialize(INT32 Width, INT32 Height)
 		return E_FAIL;
 	}
 
-	UpdateDisplayingText();
 	return S_OK;
 }
 

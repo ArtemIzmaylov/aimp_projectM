@@ -34,13 +34,9 @@ protected:
 
 	SINGLE  waveform[2 * AIMP_VISUAL_WAVEFORM_MAX] = {};
 
-	virtual void ConfigLoad();
-	virtual void ConfigLoad(IAIMPConfig* config);
-	virtual void ConfigSave(IAIMPConfig* config);
 	IAIMPString* MakeString(const TChar* text);
 	void OnError(const char* text);
 	virtual void ResizeSurface(int w, int h);
-	virtual void UpdateDisplayingText();
 protected:
 	virtual void DrawCore(PAIMPVisualData Data);
 

@@ -7,23 +7,7 @@ VisualizationBase::VisualizationBase(IAIMPCore* core)
 	this->pathPresets  = (std::filesystem::path(currentPath) / "Presets").string();
 	this->pathTextures = (std::filesystem::path(currentPath) / "Textures").string();
 	error.clear();
-}
 
-void VisualizationBase::ConfigLoad()
-{
-	IAIMPServiceConfig* config = nullptr;
-	if (Succeeded(core->QueryInterface(IID_IAIMPConfig, reinterpret_cast<void**>(&config))))
-		ConfigLoad(config);
-}
-
-void VisualizationBase::ConfigLoad(IAIMPConfig* config)
-{
-	// do nothing
-}
-
-void VisualizationBase::ConfigSave(IAIMPConfig* config)
-{
-	// do nothing
 }
 
 IAIMPString* VisualizationBase::MakeString(const TChar* text)
@@ -44,10 +28,6 @@ BOOL VisualizationBase::isOurRIID(REFIID riid)
 
 void WINAPI VisualizationBase::Finalize()
 {
-	IAIMPServiceConfig* config = nullptr;
-	if (Succeeded(core->QueryInterface(IID_IAIMPConfig, reinterpret_cast<void**>(&config))))
-		ConfigSave(config);
-
 	if (presets)
 	{
 		projectm_playlist_destroy(presets);
@@ -144,7 +124,6 @@ void VisualizationBase::DrawCore(PAIMPVisualData Data)
 		if (index != activePreset)
 		{
 			activePreset = index;
-			UpdateDisplayingText();
 		}
 	}
 }
@@ -167,9 +146,4 @@ void WINAPI VisualizationBase::Resize(INT32 NewWidth, INT32 NewHeight)
 void VisualizationBase::ResizeSurface(int w, int h)
 {
 	projectm_set_window_size(pm, width, height);
-}
-
-void VisualizationBase::UpdateDisplayingText()
-{
-	// do nothing
 }
