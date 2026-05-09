@@ -9,7 +9,7 @@
 
 static const TChar Author[] = TEXT("Artem Izmaylov");
 static const TChar Description[] = TEXT("The most advanced open-source music visualizer");
-static const TChar Name[] = TEXT("ProjectM Visualization v1.0b");
+static const TChar Name[] = TEXT("ProjectM Visualization v1.01b");
 
 class Plugin : public IUnknownImpl<IAIMPPlugin>
 {

@@ -1,3 +1,9 @@
+v1.01b (09.05.2026)
+-------------------
++ General: migration to GLFW
++ General: rendering to the embedded player window
+
+
 v1.00b (08.05.2026)
 -------------------
 + First public release
