@@ -1,5 +1,6 @@
 #include "VisualizationEmbedded.h"
 
+#define GL_BGRA_EXT 0x80E1
 static const TChar VisualizationName[] = TEXT("ProjectM");
 
 VisualizationEmbedded::~VisualizationEmbedded()
@@ -56,7 +57,7 @@ void WINAPI VisualizationEmbedded::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 	DrawCore(Data);
 	if (buffer == nullptr)
 		buffer = new unsigned char[width * height * 4];
-	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	glReadPixels(0, 0, width, height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
 	SetDIBitsToDevice(Canvas, 0, 0, width, height, 0, 0, 0, height, buffer, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
 }
 
@@ -160,5 +161,5 @@ HRESULT _unknwncall VisualizationEmbedded::QueryInterface(REFIID riid, LPVOID* p
 void WINAPI VisualizationEmbeddedDirectOutput::Draw(RGBQUAD* Buffer, PAIMPVisualData Data)
 {
 	owner->DrawCore(Data);
-	glReadPixels(0, 0, owner->width, owner->height, GL_RGBA, GL_UNSIGNED_BYTE, Buffer);
+	glReadPixels(0, 0, owner->width, owner->height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, Buffer);
 }
