@@ -102,7 +102,7 @@ void VisualizationEmbedded::FreeFrameObject()
 {
 	if (buffer) 
 	{
-		delete buffer;
+		delete[] buffer;
 		buffer = nullptr;
 	}
 

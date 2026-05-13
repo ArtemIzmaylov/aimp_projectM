@@ -134,6 +134,7 @@ void VisualizationBase::DrawCore(PAIMPVisualData Data)
 					path = "preset: " + path.substr(pos + 1);
 					LogEntry(path.data());
 				}
+				projectm_playlist_free_string(active);
 			}
 			else
 				LogEntry("preset: idle");
