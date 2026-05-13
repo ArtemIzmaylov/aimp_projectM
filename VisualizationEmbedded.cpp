@@ -78,8 +78,8 @@ void VisualizationEmbedded::DrawCore(PAIMPVisualData Data)
 		glViewport(0, 0, width, height);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
 		projectm_opengl_render_frame(pm);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); // switch back, to obtain all composition
 	}
 }
 
@@ -161,6 +161,7 @@ void VisualizationEmbedded::ResizeSurface(int w, int h)
 		FreeFrameObject();
 	}
 
+	glfwSetWindowSize(window, w, h);
 	bmi.biSize = sizeof(bmi);
 	bmi.biWidth = width;
 	bmi.biHeight = -height;
