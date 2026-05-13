@@ -61,8 +61,14 @@ HRESULT WINAPI VisualizationBase::Initialize(INT32 Width, INT32 Height)
 	projectm_set_texture_search_paths(pm, &path, 1);
 
 	projectm_set_fps(pm, 30);
+	projectm_set_mesh_size(pm, 48, 32);
 	projectm_set_beat_sensitivity(pm, 1.0);
 	projectm_set_aspect_correction(pm, true);
+	projectm_set_soft_cut_duration(pm, 3.0);
+	projectm_set_hard_cut_enabled(pm, false);
+	projectm_set_hard_cut_duration(pm, 20.0);
+	projectm_set_hard_cut_sensitivity(pm, 1.0);
+	
 
 	presets = projectm_playlist_create(pm);
 	if (presets != nullptr)
@@ -113,8 +119,8 @@ void VisualizationBase::DrawCore(PAIMPVisualData Data)
 	int j = 0;
 	for (int i = 0; i < AIMP_VISUAL_WAVEFORM_MAX; i++)
 	{
-		waveform[j++] = Data->WaveForm[0][i];
-		waveform[j++] = Data->WaveForm[1][i];
+		waveform[j++] = max(min(Data->WaveForm[0][i], 1.0f), -1.0f);
+		waveform[j++] = max(min(Data->WaveForm[1][i], 1.0f), -1.0f);
 	}
 	projectm_pcm_add_float(pm, &waveform[0], AIMP_VISUAL_WAVEFORM_MAX, PROJECTM_STEREO);
 
