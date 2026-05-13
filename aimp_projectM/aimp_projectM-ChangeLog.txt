@@ -1,7 +1,15 @@
+v1.02b (13.05.2026)
+-------------------
+- Fixed: output was flipped vertically
+- Fixed: red-blue channels has been swapped
+- Fixed: back-buffer was not rendered to the embedded player's window
+- Fixed: memory leaks
+
+
 v1.01b (09.05.2026)
 -------------------
 + General: migration to GLFW
-+ General: rendering to the embedded player window
++ General: rendering to the embedded player's window
 
 
 v1.00b (08.05.2026)
