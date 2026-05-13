@@ -162,9 +162,10 @@ void VisualizationEmbedded::ResizeSurface(int w, int h)
 	}
 
 	glfwSetWindowSize(window, w, h);
+
 	bmi.biSize = sizeof(bmi);
 	bmi.biWidth = width;
-	bmi.biHeight = -height;
+	bmi.biHeight = height;
 	bmi.biPlanes = 1;
 	bmi.biBitCount = 32;
 	bmi.biCompression = BI_RGB;
@@ -186,8 +187,36 @@ HRESULT _unknwncall VisualizationEmbedded::QueryInterface(REFIID riid, LPVOID* p
 	return result;
 }
 
+/****************************** VisualizationEmbeddedDirectOutput ******************************/
+
+VisualizationEmbeddedDirectOutput::~VisualizationEmbeddedDirectOutput()
+{
+	if (flipBuffer)
+		delete[] flipBuffer;
+}
+
 void WINAPI VisualizationEmbeddedDirectOutput::Draw(RGBQUAD* Buffer, PAIMPVisualData Data)
 {
 	owner->DrawCore(Data);
 	owner->ReadPixels(Buffer);
+
+	if (owner->width != flipBufferSize)
+	{
+		if (flipBuffer)
+			delete[] flipBuffer;
+		flipBufferSize = owner->width;
+		flipBuffer = new uint8_t[flipBufferSize * sizeof(RGBQUAD)];
+	}
+
+	int rowSize = flipBufferSize * sizeof(RGBQUAD);
+	int height = owner->height;
+	for (int y = 0; y < height / 2; y++)
+	{
+		uint8_t* row1 = (uint8_t*)Buffer + rowSize * y;
+		uint8_t* row2 = (uint8_t*)Buffer + rowSize * (height - 1 - y);
+
+		std::memcpy(flipBuffer, row1, rowSize);
+		std::memcpy(row1, row2, rowSize);
+		std::memcpy(row2, flipBuffer, rowSize);
+	}
 }

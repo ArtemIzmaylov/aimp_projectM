@@ -1,7 +1,7 @@
 #pragma once
 
 #define PROJECTM_STATIC_DEFINE 1
-#define PROJECTM_DEBUG_OUTPUT 1
+#define PROJECTM_DEBUG_OUTPUT 0
 
 #include "aimp_sdk/apiMessages.h"
 #include "aimp_sdk/apiTypes.h"

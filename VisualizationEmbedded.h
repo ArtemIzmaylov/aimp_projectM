@@ -38,8 +38,12 @@ public:
 
 class VisualizationEmbeddedDirectOutput : public ISubInterfaceImpl<VisualizationEmbedded, IAIMPVisualizationDirectOutput>
 {
+private:
+	uint8_t* flipBuffer = nullptr;
+	int flipBufferSize = 0;
 public:
 	VisualizationEmbeddedDirectOutput(VisualizationEmbedded* owner) : ISubInterfaceImpl(owner) {}
+   ~VisualizationEmbeddedDirectOutput();
 	// IAIMPVisualizationDirectOutput
 	virtual void WINAPI Draw(RGBQUAD* Buffer, PAIMPVisualData Data);
 };
