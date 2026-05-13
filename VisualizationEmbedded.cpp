@@ -1,6 +1,6 @@
 #include "VisualizationEmbedded.h"
 
-#define GL_BGRA_EXT 0x80E1
+static const GLenum PixelFormats[] = {GL_BGRA, GL_BGRA_EXT, GL_RGBA};
 static const TChar VisualizationName[] = TEXT("ProjectM");
 
 VisualizationEmbedded::~VisualizationEmbedded()
@@ -56,9 +56,9 @@ void WINAPI VisualizationEmbedded::Draw(HCANVAS Canvas, PAIMPVisualData Data)
 {
 	DrawCore(Data);
 	if (buffer == nullptr)
-		buffer = new unsigned char[width * height * 4];
-	glReadPixels(0, 0, width, height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
-	SetDIBitsToDevice(Canvas, 0, 0, width, height, 0, 0, 0, height, buffer, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
+		buffer = new RGBQUAD[width * height];
+	ReadPixels(buffer);
+	SetDIBitsToDevice(Canvas, 0, 0, width, height, 0, 0, 0, height, (void*)buffer, (BITMAPINFO*)&bmi, DIB_RGB_COLORS);
 }
 
 void VisualizationEmbedded::DrawCore(PAIMPVisualData Data)
@@ -125,6 +125,33 @@ HRESULT WINAPI VisualizationEmbedded::GetName(IAIMPString** S)
 	return S_OK;
 }
 
+void VisualizationEmbedded::ReadPixels(RGBQUAD* buffer)
+{
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	
+	if (pixelFormat == 0)
+	{
+		for (const auto& format : PixelFormats)
+		{
+			glReadPixels(0, 0, width, height, format, GL_UNSIGNED_BYTE, buffer);
+			if (glGetError() != GL_INVALID_ENUM) 
+			{
+				pixelFormat = format;
+				if (pixelFormat == GL_RGBA)
+					LogEntry("BGRA not supported");
+				break;
+			}
+		}
+	}
+
+	glReadPixels(0, 0, width, height, pixelFormat, GL_UNSIGNED_BYTE, buffer);
+	if (pixelFormat == GL_RGBA)
+	{
+		for (int i = 0; i < width * height; i++)
+			std::swap(buffer[i].rgbRed, buffer[i].rgbBlue);
+	}
+}
+
 void VisualizationEmbedded::ResizeSurface(int w, int h)
 {
 	FreeFrameObject();
@@ -161,5 +188,5 @@ HRESULT _unknwncall VisualizationEmbedded::QueryInterface(REFIID riid, LPVOID* p
 void WINAPI VisualizationEmbeddedDirectOutput::Draw(RGBQUAD* Buffer, PAIMPVisualData Data)
 {
 	owner->DrawCore(Data);
-	glReadPixels(0, 0, owner->width, owner->height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, Buffer);
+	owner->ReadPixels(Buffer);
 }

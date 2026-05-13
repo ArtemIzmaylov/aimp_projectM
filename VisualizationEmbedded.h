@@ -8,9 +8,10 @@ class VisualizationEmbedded : public VisualizationBase
 private:
 	GLuint fbo = 0;
 	GLuint texture = 0;
+	GLenum pixelFormat = 0;
 	GLFWwindow* window = nullptr;
 
-	void* buffer = nullptr;
+	RGBQUAD* buffer = nullptr;
 	BITMAPINFOHEADER bmi = {};
 	IAIMPVisualizationDirectOutput* directOutput = nullptr;
 
@@ -18,6 +19,7 @@ private:
 	void FreeFrameObject();
 protected:
 	virtual void DrawCore(PAIMPVisualData Data);
+	virtual void ReadPixels(RGBQUAD* buffer);
 	virtual void ResizeSurface(int w, int h);
 
 	// IAIMPExtensionEmbeddedVisualization
