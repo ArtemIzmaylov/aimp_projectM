@@ -89,9 +89,7 @@ HRESULT WINAPI VisualizationBase::Initialize(INT32 Width, INT32 Height)
 
 DWORD WINAPI VisualizationBase::GetFlags()
 {
-	return
-		AIMP_VISUAL_FLAGS_NOT_SUSPEND |
-		AIMP_VISUAL_FLAGS_RQD_DATA_WAVEFORM;
+	return AIMP_VISUAL_FLAGS_RQD_DATA_WAVEFORM;
 }
 
 HRESULT WINAPI VisualizationBase::GetMaxDisplaySize(INT32* Width, INT32* Height)
